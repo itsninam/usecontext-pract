@@ -1,13 +1,27 @@
 import "./App.css";
+import { faker } from "@faker-js/faker";
+import { useState } from "react";
+
+function createRandomPost() {
+  return {
+    title: `${faker.hacker.adjective()} ${faker.hacker.noun()}`,
+    body: faker.hacker.phrase(),
+  };
+}
 
 function App() {
+  const [posts, setPosts] = useState(
+    Array.from({ length: 30 }, () => createRandomPost())
+  );
+
+  console.log(posts);
   return (
-    <div className="App">
+    <>
       <Header>
         <Results />
         <SearchBlogs />
       </Header>
-    </div>
+    </>
   );
 }
 
