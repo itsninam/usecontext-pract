@@ -16,10 +16,17 @@ function App() {
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  const searchedBlog = posts.filter((post) =>
-    `${post.title} ${post.body}`.includes(searchQuery)
-  );
-  console.log(posts);
+  const searchedBlog = !searchQuery
+    ? posts
+    : posts.filter((post) =>
+        `${post.title} ${post.body}`
+          .toLowerCase()
+          .includes(searchQuery.toLocaleLowerCase())
+      );
+
+  const handleAddBlog = (newBlog) => {
+    setPosts([...posts, newBlog]);
+  };
 
   return (
     <PostContext.Provider
@@ -28,6 +35,7 @@ function App() {
         setPosts,
         searchQuery,
         setSearchQuery,
+        handleAddBlog,
       }}
     >
       <Header>
@@ -35,6 +43,7 @@ function App() {
         <SearchBlogs />
       </Header>
       <Main>
+        <AddBlog />
         <BlogsList />
       </Main>
     </PostContext.Provider>
@@ -64,6 +73,10 @@ function Results() {
 function SearchBlogs() {
   const { setPosts, searchQuery, setSearchQuery } = useContext(PostContext);
 
+  const handleClearPosts = () => {
+    setPosts([]);
+  };
+
   return (
     <>
       <form>
@@ -75,7 +88,7 @@ function SearchBlogs() {
           onChange={(event) => setSearchQuery(event.target.value)}
         />
       </form>
-      <button onClick={() => setPosts([])}>Clear blogs</button>
+      <button onClick={handleClearPosts}>Clear blogs</button>
     </>
   );
 }
@@ -86,6 +99,7 @@ function Main({ children }) {
 
 function BlogsList() {
   const { blogs } = useContext(PostContext);
+
   if (!blogs.length) {
     return <h2>No blogs found...</h2>;
   }
@@ -105,5 +119,44 @@ function Blog({ blog }) {
       <span>{blog.title}</span>
       <span>{blog.body}</span>
     </li>
+  );
+}
+
+function AddBlog() {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const { handleAddBlog } = useContext(PostContext);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!title || !body) {
+      return alert("Please enter a title and a message!");
+    }
+    handleAddBlog({ title, body });
+
+    setTitle("");
+    setBody("");
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="add-blog-form">
+      <label htmlFor="blog-name">Enter a blog name:</label>
+      <input
+        type="text"
+        id="blog-name"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+      />
+
+      <label htmlFor="blog-message">Enter a blog message:</label>
+      <input
+        type="text"
+        id="blog-message"
+        value={body}
+        onChange={(event) => setBody(event.target.value)}
+      />
+
+      <button type="submit">Post</button>
+    </form>
   );
 }

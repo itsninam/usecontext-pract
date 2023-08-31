@@ -35,3 +35,7 @@ li span:first-child {
   font-weight: bold;
   text-transform: capitalize;
 }
+
+.add-blog-form input {
+  margin-right: 16px;
+}
