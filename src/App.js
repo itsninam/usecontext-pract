@@ -1,6 +1,6 @@
 import "./App.css";
 import { faker } from "@faker-js/faker";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 function createRandomPost() {
   return {
@@ -9,6 +9,7 @@ function createRandomPost() {
   };
 }
 
+const PostContext = createContext();
 function App() {
   const [posts, setPosts] = useState(
     Array.from({ length: 30 }, () => createRandomPost())
@@ -16,12 +17,19 @@ function App() {
 
   console.log(posts);
   return (
-    <>
+    <PostContext.Provider
+      value={{
+        posts,
+      }}
+    >
       <Header>
         <Results />
         <SearchBlogs />
       </Header>
-    </>
+      <Main>
+        <BlogsList />
+      </Main>
+    </PostContext.Provider>
   );
 }
 
@@ -41,7 +49,8 @@ function Logo() {
 }
 
 function Results() {
-  return <p>🚀 X blogs found</p>;
+  const { posts } = useContext(PostContext);
+  return <p>🚀 {posts.length} blogs found</p>;
 }
 
 function SearchBlogs() {
@@ -53,5 +62,29 @@ function SearchBlogs() {
       </form>
       <button>Clear posts</button>
     </>
+  );
+}
+
+function Main({ children }) {
+  return <main>{children}</main>;
+}
+
+function BlogsList() {
+  const { posts } = useContext(PostContext);
+  return (
+    <ul>
+      {posts.map((post, index) => {
+        return <Blog post={post} key={index} />;
+      })}
+    </ul>
+  );
+}
+
+function Blog({ post }) {
+  return (
+    <li>
+      <span>{post.title}</span>
+      <span>{post.body}</span>
+    </li>
   );
 }
