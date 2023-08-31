@@ -14,13 +14,20 @@ function App() {
   const [posts, setPosts] = useState(
     Array.from({ length: 30 }, () => createRandomPost())
   );
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const searchedBlog = posts.filter((post) =>
+    `${post.title} ${post.body}`.includes(searchQuery)
+  );
   console.log(posts);
+
   return (
     <PostContext.Provider
       value={{
-        posts,
+        blogs: searchedBlog,
         setPosts,
+        searchQuery,
+        setSearchQuery,
       }}
     >
       <Header>
@@ -50,17 +57,23 @@ function Logo() {
 }
 
 function Results() {
-  const { posts } = useContext(PostContext);
-  return <p>🚀 {posts.length} blogs found</p>;
+  const { blogs } = useContext(PostContext);
+  return <p>🚀 {blogs.length} blogs found</p>;
 }
 
 function SearchBlogs() {
-  const { setPosts } = useContext(PostContext);
+  const { setPosts, searchQuery, setSearchQuery } = useContext(PostContext);
+
   return (
     <>
       <form>
         <label htmlFor="search-blogs">Search blogs: </label>
-        <input type="text" id="search-blogs" />
+        <input
+          type="text"
+          id="search-blogs"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+        />
       </form>
       <button onClick={() => setPosts([])}>Clear blogs</button>
     </>
@@ -72,25 +85,25 @@ function Main({ children }) {
 }
 
 function BlogsList() {
-  const { posts } = useContext(PostContext);
-  if (!posts.length) {
+  const { blogs } = useContext(PostContext);
+  if (!blogs.length) {
     return <h2>No blogs found...</h2>;
   }
 
   return (
     <ul>
-      {posts.map((post, index) => {
-        return <Blog post={post} key={index} />;
+      {blogs.map((blog, index) => {
+        return <Blog blog={blog} key={index} />;
       })}
     </ul>
   );
 }
 
-function Blog({ post }) {
+function Blog({ blog }) {
   return (
     <li>
-      <span>{post.title}</span>
-      <span>{post.body}</span>
+      <span>{blog.title}</span>
+      <span>{blog.body}</span>
     </li>
   );
 }
