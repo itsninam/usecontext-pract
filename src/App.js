@@ -20,6 +20,7 @@ function App() {
     <PostContext.Provider
       value={{
         posts,
+        setPosts,
       }}
     >
       <Header>
@@ -54,13 +55,14 @@ function Results() {
 }
 
 function SearchBlogs() {
+  const { setPosts } = useContext(PostContext);
   return (
     <>
       <form>
         <label htmlFor="search-blogs">Search blogs: </label>
         <input type="text" id="search-blogs" />
       </form>
-      <button>Clear posts</button>
+      <button onClick={() => setPosts([])}>Clear blogs</button>
     </>
   );
 }
@@ -71,6 +73,10 @@ function Main({ children }) {
 
 function BlogsList() {
   const { posts } = useContext(PostContext);
+  if (!posts.length) {
+    return <h2>No blogs found...</h2>;
+  }
+
   return (
     <ul>
       {posts.map((post, index) => {
