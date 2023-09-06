@@ -1,17 +1,43 @@
 import "./App.css";
-import { useState } from "react";
-import { PostProvider, usePosts } from "./PostProvider";
+import { faker } from "@faker-js/faker";
+import { createContext, useContext, useState } from "react";
 
-// function createRandomPost() {
-//   return {
-//     title: `${faker.hacker.adjective()} ${faker.hacker.noun()}`,
-//     body: faker.hacker.phrase(),
-//   };
-// }
+function createRandomPost() {
+  return {
+    title: `${faker.hacker.adjective()} ${faker.hacker.noun()}`,
+    body: faker.hacker.phrase(),
+  };
+}
 
+const PostContext = createContext();
 function App() {
+  const [posts, setPosts] = useState(
+    Array.from({ length: 30 }, () => createRandomPost())
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const searchedBlog = !searchQuery
+    ? posts
+    : posts.filter((post) =>
+        `${post.title} ${post.body}`
+          .toLowerCase()
+          .includes(searchQuery.toLocaleLowerCase())
+      );
+
+  const handleAddBlog = (newBlog) => {
+    setPosts([...posts, newBlog]);
+  };
+
   return (
-    <PostProvider>
+    <PostContext.Provider
+      value={{
+        blogs: searchedBlog,
+        setPosts,
+        searchQuery,
+        setSearchQuery,
+        handleAddBlog,
+      }}
+    >
       <Header>
         <Results />
         <SearchBlogs />
@@ -20,7 +46,7 @@ function App() {
         <AddBlog />
         <BlogsList />
       </Main>
-    </PostProvider>
+    </PostContext.Provider>
   );
 }
 
@@ -40,12 +66,12 @@ function Logo() {
 }
 
 function Results() {
-  const { blogs } = usePosts();
+  const { blogs } = useContext(PostContext);
   return <p>🚀 {blogs.length} blogs found</p>;
 }
 
 function SearchBlogs() {
-  const { setPosts, searchQuery, setSearchQuery } = usePosts();
+  const { setPosts, searchQuery, setSearchQuery } = useContext(PostContext);
 
   const handleClearPosts = () => {
     setPosts([]);
@@ -72,7 +98,7 @@ function Main({ children }) {
 }
 
 function BlogsList() {
-  const { blogs } = usePosts();
+  const { blogs } = useContext(PostContext);
 
   if (!blogs.length) {
     return <h2>No blogs found...</h2>;
@@ -99,7 +125,7 @@ function Blog({ blog }) {
 function AddBlog() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const { handleAddBlog } = usePosts();
+  const { handleAddBlog } = useContext(PostContext);
 
   const handleSubmit = (event) => {
     event.preventDefault();
